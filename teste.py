@@ -17,6 +17,7 @@ def formatar_data(data):
         data = (datetime(1899, 12, 30) + timedelta(days=int(data))).date()
     return data.strftime('%d%m%Y') if isinstance(data, datetime) else str(data)
 
+
 def formatar_valor(valor):
     if pd.isna(valor):
         return '0,00'
