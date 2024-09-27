@@ -85,25 +85,52 @@ def main():
                 if pd.isna(df.iloc[-1][colunas['CNPJ/CPF']]) or 'TOTAL' in str(df.iloc[-1][colunas['FORNECEDOR']]).upper():
                     df = df.iloc[:-1]
 
-                # Criar o DataFrame de saída
-                df_saida = pd.DataFrame({
-                    'Identificação do tipo de integração de título': ['PP'] * len(df),
-                    'Codigo do Fornecedor': df[colunas['CNPJ/CPF']].apply(limpar_cnpj_cpf),
-                    'Numero do Titulo': df[colunas['Nº DOCTO']].apply(limpar_numero_documento),
-                    'Documento Fiscal': df[colunas['Nº DOCTO']].apply(limpar_numero_documento),
-                    'Empresa Emitente': ['0001'] * len(df),
-                    'Codigo da Filial': ['01'] * len(df),
-                    'Empresa Pagadora': ['0001'] * len(df),
-                    'Tipo de Titulo': ['55'] * len(df),
-                    'Data de Emissao do Titulo': df[colunas['DATA DA ENTRADA']].apply(formatar_data),
-                    'Data de Vencimento do Titulo': df[colunas['VENCTO']].apply(formatar_data),
-                    'Data de Programacao do Titulo': df[colunas['VENCTO']].apply(formatar_data),
-                    'Codigo da Moeda': ['BRL'] * len(df),
-                    'Tipo de Cobranca': ['CA'] * len(df),
-                    'Grupo de Pagamento': df[colunas['FORNECEDOR']].apply(determinar_grupo_pagamento),
-                    'Valor do Grupo de Pagamento': df[colunas['VALOR']].apply(formatar_valor),
-                    'Codigo do fluxo de caixa': ['01'] * len(df),
-                })
+                # Criar o DataFrame de saída com as colunas na ordem correta
+                colunas_saida = [
+                    'Identificação do tipo de integração de título',
+                    'Codigo do Fornecedor',
+                    'Numero do Titulo',
+                    'Documento Fiscal',
+                    'Empresa Emitente',
+                    'Codigo da Filial',
+                    'Empresa Pagadora',
+                    'Tipo de Titulo',
+                    'Data de Emissao do Titulo',
+                    'Data de Vencimento do Titulo',
+                    'Data de Programacao do Titulo',
+                    'Codigo da Moeda',
+                    'Tipo de Cobranca',
+                ]
+
+                df_saida = pd.DataFrame(columns=colunas_saida)
+
+                # Preencher as colunas
+                df_saida['Identificação do tipo de integração de título'] = ['PP'] * len(df)
+                df_saida['Codigo do Fornecedor'] = df[colunas['CNPJ/CPF']].apply(limpar_cnpj_cpf)
+                df_saida['Numero do Titulo'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)
+                df_saida['Documento Fiscal'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)
+                df_saida['Empresa Emitente'] = ['0001'] * len(df)
+                df_saida['Codigo da Filial'] = ['01'] * len(df)
+                df_saida['Empresa Pagadora'] = ['0001'] * len(df)
+                df_saida['Tipo de Titulo'] = ['55'] * len(df)
+                df_saida['Data de Emissao do Titulo'] = df[colunas['DATA DA ENTRADA']].apply(formatar_data)
+                df_saida['Data de Vencimento do Titulo'] = df[colunas['VENCTO']].apply(formatar_data)
+                df_saida['Data de Programacao do Titulo'] = df[colunas['VENCTO']].apply(formatar_data)
+                df_saida['Codigo da Moeda'] = ['BRL'] * len(df)
+                df_saida['Tipo de Cobranca'] = ['CA'] * len(df)
+
+                # Adicionar as colunas nas posições específicas
+                df_saida.insert(loc=df_saida.columns.get_loc('Codigo da Moeda') + 1, 
+                                column='Grupo de Pagamento', 
+                                value=df[colunas['FORNECEDOR']].apply(determinar_grupo_pagamento))
+                
+                df_saida.insert(loc=df_saida.columns.get_loc('Grupo de Pagamento') + 1, 
+                                column='Valor do Grupo de Pagamento', 
+                                value=df[colunas['VALOR']].apply(formatar_valor))
+                
+                df_saida.insert(loc=df_saida.columns.get_loc('Valor do Grupo de Pagamento') + 1, 
+                                column='Codigo do fluxo de caixa', 
+                                value=['01'] * len(df))
 
                 st.write("Preview dos dados convertidos:")
                 st.dataframe(df_saida)
