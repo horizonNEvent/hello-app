@@ -3,6 +3,7 @@ import pandas as pd
 import re
 from datetime import datetime, timedelta
 import io
+import string
 
 # Funções auxiliares (mantenha as funções existentes)
 def limpar_cnpj_cpf(valor):
@@ -85,52 +86,33 @@ def main():
                 if pd.isna(df.iloc[-1][colunas['CNPJ/CPF']]) or 'TOTAL' in str(df.iloc[-1][colunas['FORNECEDOR']]).upper():
                     df = df.iloc[:-1]
 
-                # Criar o DataFrame de saída com as colunas na ordem correta
-                colunas_saida = [
-                    'Identificação do tipo de integração de título',
-                    'Codigo do Fornecedor',
-                    'Numero do Titulo',
-                    'Documento Fiscal',
-                    'Empresa Emitente',
-                    'Codigo da Filial',
-                    'Empresa Pagadora',
-                    'Tipo de Titulo',
-                    'Data de Emissao do Titulo',
-                    'Data de Vencimento do Titulo',
-                    'Data de Programacao do Titulo',
-                    'Codigo da Moeda',
-                    'Tipo de Cobranca',
-                ]
-
+                # Criar o DataFrame de saída com 100 colunas vazias
+                colunas_saida = [f'Coluna_{i}' for i in range(100)]
                 df_saida = pd.DataFrame(columns=colunas_saida)
 
-                # Preencher as colunas
-                df_saida['Identificação do tipo de integração de título'] = ['PP'] * len(df)
-                df_saida['Codigo do Fornecedor'] = df[colunas['CNPJ/CPF']].apply(limpar_cnpj_cpf)
-                df_saida['Numero do Titulo'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)
-                df_saida['Documento Fiscal'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)
-                df_saida['Empresa Emitente'] = ['0001'] * len(df)
-                df_saida['Codigo da Filial'] = ['0001'] * len(df)
-                df_saida['Empresa Pagadora'] = ['0001'] * len(df)
-                df_saida['Tipo de Titulo'] = ['55'] * len(df)
-                df_saida['Data de Emissao do Titulo'] = df[colunas['DATA DA ENTRADA']].apply(formatar_data)
-                df_saida['Data de Vencimento do Titulo'] = df[colunas['VENCTO']].apply(formatar_data)
-                df_saida['Data de Programacao do Titulo'] = df[colunas['VENCTO']].apply(formatar_data)
-                df_saida['Codigo da Moeda'] = ['BRL'] * len(df)
-                df_saida['Tipo de Cobranca'] = ['CA'] * len(df)
+                # Preencher as colunas nas posições corretas
+                df_saida['Coluna_0'] = ['PP'] * len(df)  # Identificação do tipo de integração de título
+                df_saida['Coluna_1'] = df[colunas['CNPJ/CPF']].apply(limpar_cnpj_cpf)  # Codigo do Fornecedor
+                df_saida['Coluna_2'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)  # Numero do Titulo
+                df_saida['Coluna_3'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)  # Documento Fiscal
+                df_saida['Coluna_4'] = ['0001'] * len(df)  # Empresa Emitente
+                df_saida['Coluna_5'] = ['0001'] * len(df)  # Codigo da Filial
+                df_saida['Coluna_6'] = ['0001'] * len(df)  # Empresa Pagadora
+                df_saida['Coluna_7'] = ['55'] * len(df)  # Tipo de Titulo
+                df_saida['Coluna_8'] = df[colunas['DATA DA ENTRADA']].apply(formatar_data)  # Data de Emissao do Titulo
+                df_saida['Coluna_9'] = df[colunas['VENCTO']].apply(formatar_data)  # Data de Vencimento do Titulo
+                df_saida['Coluna_10'] = df[colunas['VENCTO']].apply(formatar_data)  # Data de Programacao do Titulo
+                df_saida['Coluna_11'] = ['BRL'] * len(df)  # Codigo da Moeda
+                df_saida['Coluna_12'] = ['CA'] * len(df)  # Tipo de Cobranca
 
                 # Adicionar as colunas nas posições específicas
-                df_saida.insert(loc=df_saida.columns.get_loc('Codigo da Moeda') + 1, 
-                                column='Grupo de Pagamento', 
-                                value=df[colunas['FORNECEDOR']].apply(determinar_grupo_pagamento))
-                
-                df_saida.insert(loc=df_saida.columns.get_loc('Grupo de Pagamento') + 1, 
-                                column='Valor do Grupo de Pagamento', 
-                                value=df[colunas['VALOR']].apply(formatar_valor))
-                
-                df_saida.insert(loc=df_saida.columns.get_loc('Valor do Grupo de Pagamento') + 1, 
-                                column='Codigo do fluxo de caixa', 
-                                value=['01'] * len(df))
+                df_saida['Coluna_82'] = df[colunas['FORNECEDOR']].apply(determinar_grupo_pagamento)  # CE: Grupo de Pagamento
+                df_saida['Coluna_84'] = df[colunas['VALOR']].apply(formatar_valor)  # CG: Valor do Grupo de Pagamento
+                df_saida['Coluna_87'] = ['01'] * len(df)  # CJ: Codigo do fluxo de caixa
+
+                # Renomear as colunas para letras
+                letras = list(string.ascii_uppercase) + [f'A{letra}' for letra in string.ascii_uppercase] + [f'B{letra}' for letra in string.ascii_uppercase]
+                df_saida.columns = letras[:len(df_saida.columns)]
 
                 st.write("Preview dos dados convertidos:")
                 st.dataframe(df_saida)
