@@ -64,8 +64,8 @@ def main():
                 dados_saida = {
                     'A': ['PP'] * len(df),  # Identificação do tipo de integração de título
                     'B': df[colunas['CNPJ/CPF']].apply(limpar_cnpj_cpf),  # Codigo do Fornecedor
-                    'C': df[colunas['Nº DOCTO']].apply(limpar_numero_documento),  # Numero do Titulo
-                    'D': df[colunas['Nº DOCTO']].apply(limpar_numero_documento),  # Documento Fiscal
+                    'C': df[colunas['Nº DOCTO']].astype(str).str.strip(),  # Numero do Titulo
+                    'D': df[colunas['Nº DOCTO']].astype(str).str.strip(),  # Documento Fiscal
                     'E': ['0001'] * len(df),  # Empresa Emitente
                     'F': ['0001'] * len(df),  # Codigo da Filial
                     'G': ['0001'] * len(df),  # Empresa Pagadora
