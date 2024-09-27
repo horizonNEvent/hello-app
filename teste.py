@@ -3,7 +3,6 @@ import pandas as pd
 import re
 from datetime import datetime, timedelta
 import io
-import string
 
 # Funções auxiliares
 def limpar_cnpj_cpf(valor):
@@ -31,7 +30,15 @@ def determinar_grupo_pagamento(fornecedor):
 def limpar_numero_documento(valor):
     if pd.isna(valor):
         return ''
-    return str(valor).strip()
+    valor_str = str(valor).strip()
+    # Tenta remover a parte de hora se existir
+    if ' 00:00:00' in valor_str:
+        valor_str = valor_str.split(' ')[0]
+    # Se for uma data no formato yyyy-mm-dd, converte para dd-mm-yyyy
+    if re.match(r'\d{4}-\d{2}-\d{2}', valor_str):
+        partes = valor_str.split('-')
+        valor_str = f"{partes[2]}-{partes[1]}-{partes[0]}"
+    return valor_str
 
 def main():
     st.title("Conversor de Planilha")
@@ -64,8 +71,8 @@ def main():
                 dados_saida = {
                     'A': ['PP'] * len(df),  # Identificação do tipo de integração de título
                     'B': df[colunas['CNPJ/CPF']].apply(limpar_cnpj_cpf),  # Codigo do Fornecedor
-                    'C': df[colunas['Nº DOCTO']].astype(str).str.strip(),  # Numero do Titulo
-                    'D': df[colunas['Nº DOCTO']].astype(str).str.strip(),  # Documento Fiscal
+                    'C': df[colunas['Nº DOCTO']].apply(limpar_numero_documento),  # Numero do Titulo
+                    'D': df[colunas['Nº DOCTO']].apply(limpar_numero_documento),  # Documento Fiscal
                     'E': ['0001'] * len(df),  # Empresa Emitente
                     'F': ['0001'] * len(df),  # Codigo da Filial
                     'G': ['0001'] * len(df),  # Empresa Pagadora
