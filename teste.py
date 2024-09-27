@@ -5,7 +5,33 @@ from datetime import datetime, timedelta
 import io
 import string
 
-# Mantenha as funções auxiliares como estão
+# Funções auxiliares
+def limpar_cnpj_cpf(valor):
+    if pd.isna(valor):
+        return ''
+    return re.sub(r'\D', '', str(valor)).zfill(14)
+
+def formatar_data(data):
+    if pd.isna(data):
+        return ''
+    if isinstance(data, (int, float)):
+        data = (datetime(1899, 12, 30) + timedelta(days=int(data))).date()
+    return data.strftime('%d%m%Y') if isinstance(data, datetime) else str(data)
+
+def formatar_valor(valor):
+    if pd.isna(valor):
+        return '0,00'
+    return f"{valor:.2f}".replace('.', ',')
+
+def determinar_grupo_pagamento(fornecedor):
+    if 'BEBIDAS' in str(fornecedor).upper() or 'VINHO' in str(fornecedor).upper():
+        return '1106020000'
+    return '1106010000'
+
+def limpar_numero_documento(valor):
+    if pd.isna(valor):
+        return ''
+    return str(valor).strip()
 
 def main():
     st.title("Conversor de Planilha")
