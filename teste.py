@@ -110,7 +110,7 @@ def main():
                 df_saida['Numero do Titulo'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)
                 df_saida['Documento Fiscal'] = df[colunas['Nº DOCTO']].apply(limpar_numero_documento)
                 df_saida['Empresa Emitente'] = ['0001'] * len(df)
-                df_saida['Codigo da Filial'] = ['01'] * len(df)
+                df_saida['Codigo da Filial'] = ['0001'] * len(df)
                 df_saida['Empresa Pagadora'] = ['0001'] * len(df)
                 df_saida['Tipo de Titulo'] = ['55'] * len(df)
                 df_saida['Data de Emissao do Titulo'] = df[colunas['DATA DA ENTRADA']].apply(formatar_data)
